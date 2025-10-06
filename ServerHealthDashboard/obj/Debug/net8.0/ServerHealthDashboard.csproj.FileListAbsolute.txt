@@ -42,3 +42,4 @@ C:\Code\1-Portfolio\ServerHealthDashboard\ServerHealthDashboard\bin\Debug\net8.0
 C:\Code\1-Portfolio\ServerHealthDashboard\ServerHealthDashboard\bin\Debug\net8.0\MudBlazor.dll
 C:\Code\1-Portfolio\ServerHealthDashboard\ServerHealthDashboard\obj\Debug\net8.0\ServerHealthDashboard.csproj.AssemblyReference.cache
 C:\Code\1-Portfolio\ServerHealthDashboard\ServerHealthDashboard\obj\Debug\net8.0\ServerHe.3A80443D.Up2Date
+C:\Code\1-Portfolio\ServerHealthDashboard\ServerHealthDashboard\obj\Debug\net8.0\ServerHealthDashboard.sourcelink.json
