@@ -43,3 +43,11 @@ C:\Code\1-Portfolio\ServerHealthDashboard\ServerHealthDashboard\bin\Debug\net8.0
 C:\Code\1-Portfolio\ServerHealthDashboard\ServerHealthDashboard\obj\Debug\net8.0\ServerHealthDashboard.csproj.AssemblyReference.cache
 C:\Code\1-Portfolio\ServerHealthDashboard\ServerHealthDashboard\obj\Debug\net8.0\ServerHe.3A80443D.Up2Date
 C:\Code\1-Portfolio\ServerHealthDashboard\ServerHealthDashboard\obj\Debug\net8.0\ServerHealthDashboard.sourcelink.json
+C:\Code\1-Portfolio\ServerHealthDashboard\ServerHealthDashboard\bin\Debug\net8.0\Hardware.Info.dll
+C:\Code\1-Portfolio\ServerHealthDashboard\ServerHealthDashboard\bin\Debug\net8.0\System.CodeDom.dll
+C:\Code\1-Portfolio\ServerHealthDashboard\ServerHealthDashboard\bin\Debug\net8.0\System.Configuration.ConfigurationManager.dll
+C:\Code\1-Portfolio\ServerHealthDashboard\ServerHealthDashboard\bin\Debug\net8.0\System.Diagnostics.PerformanceCounter.dll
+C:\Code\1-Portfolio\ServerHealthDashboard\ServerHealthDashboard\bin\Debug\net8.0\System.Management.dll
+C:\Code\1-Portfolio\ServerHealthDashboard\ServerHealthDashboard\bin\Debug\net8.0\System.Security.Cryptography.ProtectedData.dll
+C:\Code\1-Portfolio\ServerHealthDashboard\ServerHealthDashboard\bin\Debug\net8.0\runtimes\win\lib\net8.0\System.Diagnostics.PerformanceCounter.dll
+C:\Code\1-Portfolio\ServerHealthDashboard\ServerHealthDashboard\bin\Debug\net8.0\runtimes\win\lib\net8.0\System.Management.dll

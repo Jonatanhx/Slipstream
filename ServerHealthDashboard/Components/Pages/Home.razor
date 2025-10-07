@@ -1,7 +1,94 @@
 ﻿@page "/"
+@inject ISystemMetricsService MetricsService
+@using ServerHealthDashboard.Services
 
-<PageTitle>Home</PageTitle>
+<PageTitle>Dashboard</PageTitle>
 
-<h1>Hello, world!</h1>
+<MudContainer Class="mt-16 px-8" MaxWidth="MaxWidth.False">
+    <MudGrid>
+        <MudItem xs="12" sm="6" md="4">
+            <MudPaper Elevation="2" Class="pa-4" Style="height: 200px;"></MudPaper>
+        </MudItem>
+        <MudItem xs="12" sm="6" md="4">
+            <MudPaper Elevation="2" Class="pa-4" Style="height: 200px;">
+                <MudText Typo="Typo.h3">@($"{cpuMetrics?.Usage:F2}%")</MudText>
+            </MudPaper>
+        </MudItem>
+        <MudItem xs="12" sm="12" md="4">
+            <MudPaper Elevation="2" Class="pa-4" Style="height: 200px;"></MudPaper>
+        </MudItem>
+        <MudItem xs="12" sm="6">
+            <MudGrid>
+                <MudItem xs="12">
+                    <MudPaper Elevation="2" Class="pa-4" Style="height: 200px;"></MudPaper>
+                </MudItem>
+                <MudItem xs="12">
+                    <MudPaper Elevation="2" Class="pa-4" Style="height: 200px;"></MudPaper>
+                </MudItem>
+            </MudGrid>
+        </MudItem>
+        <MudItem xs="12" sm="6">
+            <MudPaper Elevation="2" Class="pa-4" Style="height: 100%"></MudPaper>
+        </MudItem>
+        <MudItem xs="12" sm="6" md="4">
+            <MudPaper Elevation="2" Class="pa-4" Style="height: 200px;"></MudPaper>
+        </MudItem>
+        <MudItem xs="12" sm="6" md="4">
+            <MudPaper Elevation="2" Class="pa-4" Style="height: 200px;"></MudPaper>
+        </MudItem>
+        <MudItem xs="12" sm="12" md="4">
+            <MudPaper Elevation="2" Class="pa-4" Style="height: 200px;"></MudPaper>
+        </MudItem>
+    </MudGrid>
+</MudContainer>
 
-Welcome to your new app.
+@code {
+    private CpuMetrics? cpuMetrics;
+    private MemoryMetrics? memoryMetrics;
+    private System.Threading.Timer? timer;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await RefreshMetrics();
+
+        // Refresh every 2 seconds
+        timer = new System.Threading.Timer(async _ =>
+        {
+            await RefreshMetrics();
+            await InvokeAsync(StateHasChanged);
+        }, null, TimeSpan.FromSeconds(2), TimeSpan.FromSeconds(2));
+    }
+
+    private async Task RefreshMetrics()
+    {
+        cpuMetrics = await MetricsService.GetCpuMetricsAsync();
+        memoryMetrics = await MetricsService.GetMemoryMetricsAsync();
+    }
+
+    private string GetMemoryUsagePercentage()
+    {
+        if (memoryMetrics == null || memoryMetrics.TotalPhysical == 0)
+            return "0.00";
+
+        var percentage = (memoryMetrics.UsedPhysical / (double)memoryMetrics.TotalPhysical) * 100;
+        return $"{percentage:F2}";
+    }
+
+    private string FormatBytes(ulong bytes)
+    {
+        string[] sizes = { "B", "KB", "MB", "GB", "TB" };
+        double len = bytes;
+        int order = 0;
+        while (len >= 1024 && order < sizes.Length - 1)
+        {
+            order++;
+            len = len / 1024;
+        }
+        return $"{len:0.##} {sizes[order]}";
+    }
+
+    public void Dispose()
+    {
+        timer?.Dispose();
+    }
+}
