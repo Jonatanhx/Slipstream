@@ -24,7 +24,7 @@
             </MudPaper>
         </MudItem>
         <MudItem xs="12" sm="6">
-            <MudGrid Style="height: 452px; display: flex;">
+            <MudGrid Style="height: 520px; display: flex;">
                 <MudItem xs="12">
                     <MudPaper Elevation="2" Style="height: 100%;">
                     </MudPaper>
@@ -73,28 +73,6 @@
     {
         cpuMetrics = await MetricsService.GetCpuMetricsAsync();
         memoryMetrics = await MetricsService.GetMemoryMetricsAsync();
-    }
-
-    private string GetMemoryUsagePercentage()
-    {
-        if (memoryMetrics == null || memoryMetrics.TotalPhysical == 0)
-            return "0.00";
-
-        var percentage = (memoryMetrics.UsedPhysical / (double)memoryMetrics.TotalPhysical) * 100;
-        return $"{percentage:F2}";
-    }
-
-    private string FormatBytes(ulong bytes)
-    {
-        string[] sizes = { "B", "KB", "MB", "GB", "TB" };
-        double len = bytes;
-        int order = 0;
-        while (len >= 1024 && order < sizes.Length - 1)
-        {
-            order++;
-            len = len / 1024;
-        }
-        return $"{len:0.##} {sizes[order]}";
     }
 
     public void Dispose()
