@@ -5,6 +5,9 @@
 <PageTitle>Dashboard</PageTitle>
 
 <MudContainer Class="mt-16 px-8" MaxWidth="MaxWidth.False">
+  <MudItem>
+      <MudText Typo="Typo.body1" Color="Color.Primary">@($"{systemInfo?.OperatingSystem}")</MudText>
+  </MudItem>
     <MudGrid>
         <MudItem xs="12" sm="6" md="4">
             <MudPaper Elevation="2" Class="pa-4" Style="height: 200px;"></MudPaper>
@@ -45,12 +48,13 @@
 @code {
     private CpuMetrics? cpuMetrics;
     private MemoryMetrics? memoryMetrics;
+    private SystemInfo? systemInfo; 
     private System.Threading.Timer? timer;
 
     protected override async Task OnInitializedAsync()
     {
+        systemInfo = await MetricsService.GetSystemInfoAsync();
         await RefreshMetrics();
-
         // Refresh every 2 seconds
         timer = new System.Threading.Timer(async _ =>
         {

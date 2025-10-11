@@ -51,9 +51,11 @@ namespace ServerHealthDashboard.Services
         {
             return await Task.Run(() =>
             {
+                _hardwareInfo.RefreshOperatingSystem();
+                var os = _hardwareInfo.OperatingSystem;
                 return new SystemInfo
                 {
-                    OperatingSystem = _hardwareInfo.OperatingSystem.ToString(),
+                    OperatingSystem = $"{os.Name} {os.VersionString}"
                 };
             });
         }
