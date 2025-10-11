@@ -7,8 +7,24 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Content Remove="Components\TimeSeriesChart.razor" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Hardware.Info" Version="101.1.0" />
     <PackageReference Include="MudBlazor" Version="8.13.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <UpToDateCheckInput Remove="Components\TimeSeriesChart.razor" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <_ContentIncludedByDefault Remove="Components\TimeSeriesChart.razor" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="Components\Graphs\TimeSeriesChart.razor" />
   </ItemGroup>
 
 </Project>
