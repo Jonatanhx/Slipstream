@@ -11,6 +11,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Blazor-ApexCharts" Version="6.0.2" />
     <PackageReference Include="Hardware.Info" Version="101.1.0" />
     <PackageReference Include="MudBlazor" Version="8.13.0" />
   </ItemGroup>

@@ -1,7 +1,7 @@
 ﻿@inject ISystemMetricsService MetricsService
 @using ServerHealthDashboard.Services
 
-<MudPaper Class="doc-section-component-container pa-4" Style="height:100%;background-color:#24272f;">
+<MudPaper Class="doc-section-component-container pa-4" Style="height:100%; background-color:#24272f;">
     <MudText Typo="Typo.h4">CPU usage</MudText>
     <MudTimeSeriesChart ChartSeries="@_series"
                         @bind-SelectedIndex="_index"
@@ -27,10 +27,11 @@
             XAxisLines = false,
             LineStrokeWidth = 1,
             ShowLegend = false,
-            YAxisFormat = "0'%'"
-        };
+            YAxisFormat = "0'%'",
+            };
 
-    private AxisChartOptions _axisChartOptions = new() { };
+    private AxisChartOptions _axisChartOptions = new()
+    {};
 
     private TimeSeriesChartSeries _chart1 = new();
 
@@ -44,6 +45,8 @@
     private string _width = "100%";
     private string _height = "100%";
     private const int MaxDataPoints = 360;
+    private CpuMetrics? cpuMetrics;
+    private System.Threading.Timer? timer;
 
     protected override void OnInitialized()
     {
@@ -56,22 +59,16 @@
                 Data = new List<TimeSeriesChartSeries.TimeValue>(),
                 LineDisplayType = LineDisplayType.Line,
                 DataMarkerTooltipTitleFormat = "{{X_VALUE}}",
-                DataMarkerTooltipSubtitleFormat = "{{Y_VALUE}}"
+                DataMarkerTooltipSubtitleFormat = "{{Y_VALUE}}%"
             };
         _series.Add(_chart1);
         StateHasChanged();
     }
 
-    private CpuMetrics? cpuMetrics;
-    private MemoryMetrics? memoryMetrics;
-    private SystemInfo? systemInfo;
-    private System.Threading.Timer? timer;
-
     protected override async Task OnInitializedAsync()
     {
-        systemInfo = await MetricsService.GetSystemInfoAsync();
         await RefreshMetrics();
-        // Refresh every 2 seconds
+
         timer = new System.Threading.Timer(async _ =>
         {
             await RefreshMetrics();
@@ -87,10 +84,8 @@
         var now = DateTime.Now;
         var newDataPoint = new TimeSeriesChartSeries.TimeValue(now, cpuMetrics.Usage);
 
-        // Add the new data point
         _chart1.Data.Add(newDataPoint);
 
-        // Remove old data points if we exceed the maximum
         if (_chart1.Data.Count > MaxDataPoints)
         {
             _chart1.Data.RemoveAt(0);
@@ -100,7 +95,6 @@
     private async Task RefreshMetrics()
     {
         cpuMetrics = await MetricsService.GetCpuMetricsAsync();
-        memoryMetrics = await MetricsService.GetMemoryMetricsAsync();
     }
 
     public void Dispose()

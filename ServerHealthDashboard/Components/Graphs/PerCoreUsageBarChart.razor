@@ -1,0 +1,181 @@
+﻿@implements IDisposable
+@inject ISystemMetricsService MetricsService
+@using ApexCharts
+@using ServerHealthDashboard.Services
+
+<ApexChart TItem="CoreDataPoint"
+            Title="Per Core CPU Usage"
+            Options="@options"
+            @ref="chart">
+    @foreach (var coreIndex in Enumerable.Range(0, numberOfCores))
+    {
+        var currentCore = coreIndex;
+        <ApexPointSeries TItem="CoreDataPoint"
+                            Items="@coreTimeSeriesData.Where(d => d.CoreIndex == currentCore).ToList()"
+                            Name="@($"Core {currentCore + 1}")"
+                            SeriesType="SeriesType.Line"
+                            XValue="@(e => e.Timestamp)"
+                            YValue="@(e => e.UsagePercent)"
+                            OrderBy="e => e.X" />
+    }
+</ApexChart>
+
+@code {
+    private List<CoreDataPoint> coreTimeSeriesData = new();
+    private ApexChartOptions<CoreDataPoint> options;
+    private ApexChart<CoreDataPoint>? chart;
+    private CpuMetrics? cpuMetrics;
+    private System.Threading.Timer? timer;
+    private int numberOfCores = 0;
+    private const int MaxDataPoints = 20;
+
+    public class CoreDataPoint
+    {
+        public int CoreIndex { get; set; }
+        public DateTime Timestamp { get; set; }
+        public int UsagePercent { get; set; }
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadCpuMetrics();
+        ConfigureChartOptions();
+
+        timer = new System.Threading.Timer(async _ =>
+        {
+            await InvokeAsync(async () =>
+            {
+                await LoadCpuMetrics();
+                StateHasChanged();
+            });
+        }, null, TimeSpan.FromSeconds(2), TimeSpan.FromSeconds(2));
+    }
+
+    private async Task LoadCpuMetrics()
+    {
+        cpuMetrics = await MetricsService.GetCpuMetricsAsync();
+
+        if (cpuMetrics?.PerCoreUsage != null)
+        {
+            numberOfCores = cpuMetrics.PerCoreUsage.Count;
+            var timestamp = DateTime.Now;
+
+            var newDataPoints = cpuMetrics.PerCoreUsage
+                .Select((usage, index) => new CoreDataPoint
+                {
+                    CoreIndex = index,
+                    Timestamp = timestamp,
+                    UsagePercent = (int)usage
+                })
+                .ToList();
+
+            coreTimeSeriesData.AddRange(newDataPoints);
+
+            coreTimeSeriesData = coreTimeSeriesData
+                .GroupBy(d => d.CoreIndex)
+                .SelectMany(g => g.OrderByDescending(d => d.Timestamp).Take(MaxDataPoints))
+                .OrderBy(d => d.Timestamp)
+                .ToList();
+
+            if (chart != null)
+            {
+                await chart.UpdateSeriesAsync(true);
+            }
+        }
+    }
+
+    private void ConfigureChartOptions()
+    {
+        options = new ApexChartOptions<CoreDataPoint>
+        {
+            Chart = new Chart
+            {
+                Toolbar = new Toolbar
+                {
+                    Show = false
+                },
+                Animations = new Animations
+                {
+                    Enabled = false,
+                },
+                Background = "#24272f",
+                Height = "100%"
+            },
+            DataLabels = new ApexCharts.DataLabels
+            {
+                Enabled = false
+            },
+            Stroke = new Stroke
+            {
+                Curve = Curve.Straight,
+                Width = 1.5
+            },
+            Grid = new Grid
+            {
+                BorderColor = "#2f333d",
+                Row = new GridRow
+                {
+                    Colors = new List<string> { "#3a3f4c", "transparent" },
+                    Opacity = 0.5d
+                }
+            },
+            Colors = new List<string>
+            {
+                "#008FFB", "#00E396", "#FEB019", "#FF4560",
+                "#775DD0", "#546E7A", "#26a69a", "#D10CE8",
+                "#F9A3A4", "#90EE7E", "#FA4443", "#69D2E7"
+            },
+            Markers = new Markers
+            {
+                Size = 0,
+                Hover = new MarkersHover
+                {
+                    SizeOffset = 6
+                }
+            },
+            Yaxis = new List<YAxis>
+            {
+                new YAxis
+                {
+                    Title = new AxisTitle { Text = "CPU Usage (%)" },
+                    Min = 0,
+                    Max = 100,
+                    TickAmount = 5,
+                    Labels = new YAxisLabels
+                    {
+                        Formatter = "function(val) { return val.toFixed(0) + '%'; }"
+                    }
+                }
+
+            },
+            Xaxis = new XAxis
+            {
+                Title = new AxisTitle { Text = "Time" },
+                Type = XAxisType.Datetime,
+                Labels = new XAxisLabels
+                {
+                    RotateAlways = false,
+                    Rotate = -45,
+                    Format = "HH:mm"
+                }
+            },
+            Legend = new Legend
+            {
+                Position = LegendPosition.Top,
+                HorizontalAlign = ApexCharts.Align.Center,
+                Floating = false,
+                OffsetY = 0
+            },
+            Tooltip = new ApexCharts.Tooltip
+            {
+                Shared = true,
+                Intersect = false,
+            }
+        };
+    }
+
+    public void Dispose()
+    {
+        timer?.Dispose();
+    }
+}

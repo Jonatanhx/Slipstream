@@ -1,4 +1,5 @@
-﻿using Hardware.Info;
+﻿using System.Diagnostics;
+using Hardware.Info;
 
 namespace ServerHealthDashboard.Services
 {
@@ -24,11 +25,30 @@ namespace ServerHealthDashboard.Services
                 _hardwareInfo.RefreshCPUList();
                 var cpu = _hardwareInfo.CpuList.FirstOrDefault();
 
+                var numberOfCores = Environment.ProcessorCount;
+                var perCoreUsage = new List<double>();
+         
+                if (OperatingSystem.IsWindows())
+                {
+                    for (int i = 0; i < numberOfCores; i++)
+                    {
+                        using var cpuCounter = new PerformanceCounter(
+                            "Processor",
+                            "% Processor Time",
+                            i.ToString()
+                        );
+                        cpuCounter.NextValue();
+                        System.Threading.Thread.Sleep(100);
+                        perCoreUsage.Add(cpuCounter.NextValue());
+                    }
+                }
+
                 return new CpuMetrics
                 {
                     Usage = cpu?.PercentProcessorTime ?? 0,
                     Name = cpu?.Name ?? "Unknown",
-                    NumberOfCores = cpu?.NumberOfCores ?? 0,
+                    NumberOfCores = (uint)numberOfCores,
+                    PerCoreUsage = perCoreUsage,
                 };
             });
         }
@@ -67,6 +87,8 @@ public class CpuMetrics
     public double Usage { get; set; }
     public string Name { get; set; } = string.Empty;
     public uint NumberOfCores { get; set; }
+
+    public List<double> PerCoreUsage { get; set; } = [];
 }
 
 public class MemoryMetrics
