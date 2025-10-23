@@ -1,19 +1,21 @@
 ﻿@inject ISystemMetricsService MetricsService
 @using ServerHealthDashboard.Services
 
-<MudPaper Class="doc-section-component-container pa-4" Style="height:100%; background-color:#24272f;">
-    <MudText Typo="Typo.h4">CPU usage</MudText>
-    <MudTimeSeriesChart ChartSeries="@_series"
-                        @bind-SelectedIndex="_index"
-                        Width="@_width"
-                        Height="@_height"
-                        ChartOptions="@_options"
-                        AxisChartOptions="@_axisChartOptions"
-                        TimeLabelSpacing="TimeSpan.FromMinutes(5)"
-                        TimeLabelSpacingRounding="_roundedLabelSpacing"
-                        TimeLabelSpacingRoundingPadSeries="_roundedLabelSpacingPadSeries"
-                        DataMarkerTooltipTimeLabelFormat="yyyy MMM dd HH:mm:ss" />
-</MudPaper>
+<div style="height: 100%; width: 100%; padding: 16px; background-color: #24272f; border-radius: 4px;">
+    <MudPaper Class="doc-section-component-container pa-4" Style="height:100%; background-color:#24272f;">
+        <MudText Typo="Typo.h4">CPU usage</MudText>
+        <MudTimeSeriesChart ChartSeries="@_series"
+                            @bind-SelectedIndex="_index"
+                            Width="@_width"
+                            Height="@_height"
+                            ChartOptions="@_options"
+                            AxisChartOptions="@_axisChartOptions"
+                            TimeLabelSpacing="TimeSpan.FromMinutes(5)"
+                            TimeLabelSpacingRounding="_roundedLabelSpacing"
+                            TimeLabelSpacingRoundingPadSeries="_roundedLabelSpacingPadSeries"
+                            DataMarkerTooltipTimeLabelFormat="yyyy MMM dd HH:mm:ss" />
+    </MudPaper>
+</div>
 
 @code
 {

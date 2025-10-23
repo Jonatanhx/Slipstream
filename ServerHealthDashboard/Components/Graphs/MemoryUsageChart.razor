@@ -1,0 +1,71 @@
+﻿@inject ISystemMetricsService MetricsService
+@using ApexCharts
+@using ServerHealthDashboard.Services
+
+<div style="height: 100%; width: 100%; padding: 16px; background-color: #24272f; border-radius: 4px;">
+    <ApexChart TItem="MemoryData"
+               Title="Memory Usage"
+               Options="@options">
+
+        <ApexPointSeries TItem="MemoryData"
+                         Items="memoryData"
+                         SeriesType="SeriesType.Donut"
+                         Name="Memory"
+                         XValue="@(e => e.Label)"
+                         YValue="@(e => Math.Round((decimal)e.Value))"
+                         OrderByDescending="e => e.Y" />
+    </ApexChart>
+</div>
+
+@code {
+    private List<MemoryData> memoryData = new();
+    private ApexChartOptions<MemoryData> options = new();
+
+    private class MemoryData
+    {
+        public string Label { get; set; } = string.Empty;
+        public double Value { get; set; }
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        var metrics = await MetricsService.GetMemoryMetricsAsync();
+        ConfigureChartOptions();
+
+        memoryData = new List<MemoryData>
+        {
+            new MemoryData { Label = "Used", Value = metrics.UsedPhysical / (1024.0 * 1024.0 * 1024.0) },
+            new MemoryData { Label = "Available", Value = metrics.AvailablePhysical / (1024.0 * 1024.0 * 1024.0) }
+        };
+    }
+
+    private void ConfigureChartOptions()
+    {
+        options = new ApexChartOptions<MemoryData>
+            {
+                Chart = new Chart
+                {
+                    Height = "100%",
+                    Background = "#24272f"
+                },
+                Legend = new Legend
+                {
+                    Position = LegendPosition.Bottom,
+                    HorizontalAlign = ApexCharts.Align.Center,
+                    Floating = false,
+                    OffsetY = 0
+                },
+                Colors = new List<string>
+                {
+                    "#00E396", "#24272f",
+                },
+                Tooltip = new ApexCharts.Tooltip
+                {
+                    Y = new TooltipY
+                    {
+                        Formatter = "function(val) { return val.toFixed(2) + ' GB'; }"
+                    }
+                }
+            };
+    }
+}

@@ -24,7 +24,7 @@ namespace ServerHealthDashboard.Services
             {
                 _hardwareInfo.RefreshCPUList();
                 var cpu = _hardwareInfo.CpuList.FirstOrDefault();
-
+                
                 var numberOfCores = Environment.ProcessorCount;
                 var perCoreUsage = new List<double>();
          

@@ -1,76 +1,18 @@
 ﻿@page "/"
-@inject ISystemMetricsService MetricsService
-@using ServerHealthDashboard.Services
 @using ServerHealthDashboard.Components.Graphs
 
 <PageTitle>Dashboard</PageTitle>
 
-<MudContainer Class="mt-16 px-8" MaxWidth="MaxWidth.False">
-  <MudItem>
-      <MudText Typo="Typo.body1" Color="Color.Primary">@($"{systemInfo?.OperatingSystem}")</MudText>
-  </MudItem>
-    <MudGrid>
-        <MudItem xs="12" sm="6" md="4">
-            <MudPaper Elevation="2" Class="pa-4" Style="height: 200px;">
-            </MudPaper>
-        </MudItem>
-        <MudItem xs="12" sm="6" md="4">
-            <MudPaper Elevation="2" Class="pa-4" Style="height: 200px;">
-                <MudText Typo="Typo.h3">@($"{cpuMetrics?.Usage:F2}%")</MudText>
-            </MudPaper>
-        </MudItem>
-        <MudItem xs="12" sm="12" md="4">
-            <MudPaper Elevation="2"Style="height: 200px;">
-            </MudPaper>
-        </MudItem>
-        <MudItem xs="12" sm="6">
-            <MudPaper Elevation="2" Class="pa-4" Style="height: 100%; background-color:#24272f;">
-                <PerCoreUsageBarChart />
-            </MudPaper>
-        </MudItem>
-        <MudItem xs="12" sm="6">
-            <MudPaper Elevation="2" Style="height:100%; background-color:#24272f;">
-                <TimeSeriesChart/>
-            </MudPaper>
-        </MudItem>
-        <MudItem xs="12" sm="6" md="4">
-            <MudPaper Elevation="2" Class="pa-4" Style="height: 200px;"></MudPaper>
-        </MudItem>
-        <MudItem xs="12" sm="6" md="4">
-            <MudPaper Elevation="2" Class="pa-4" Style="height: 200px;"></MudPaper>
-        </MudItem>
-        <MudItem xs="12" sm="12" md="4">
-            <MudPaper Elevation="2" Class="pa-4" Style="height: 200px;"></MudPaper>
-        </MudItem>
-    </MudGrid>
-</MudContainer>
-
-@code {
-    private CpuMetrics? cpuMetrics;
-    private MemoryMetrics? memoryMetrics;
-    private SystemInfo? systemInfo; 
-    private System.Threading.Timer? timer;
-
-    protected override async Task OnInitializedAsync()
-    {
-        systemInfo = await MetricsService.GetSystemInfoAsync();
-        await RefreshMetrics();
-        // Refresh every 2 seconds
-        timer = new System.Threading.Timer(async _ =>
-        {
-            await RefreshMetrics();
-            await InvokeAsync(StateHasChanged);
-        }, null, TimeSpan.FromSeconds(2), TimeSpan.FromSeconds(2));
-    }
-
-    private async Task RefreshMetrics()
-    {
-        cpuMetrics = await MetricsService.GetCpuMetricsAsync();
-        memoryMetrics = await MetricsService.GetMemoryMetricsAsync();
-    }
-
-    public void Dispose()
-    {
-        timer?.Dispose();
-    }
-}
+<main style="display: flex; flex-direction: column; height: 100vh;">
+    <div style="display: flex; min-height: 400px; gap: 0.5em; padding: 8px;">
+        <div style="display:flex; flex: 1; height: 100%;">
+            <PerCoreUsageBarChart />
+        </div>
+        <div style="display:flex; flex: 1; height: 100%;">
+            <TimeSeriesChart />
+        </div>
+        <div style="display:flex; height: 100%;">
+            <MemoryUsageChart />
+        </div>
+    </div>
+</main>

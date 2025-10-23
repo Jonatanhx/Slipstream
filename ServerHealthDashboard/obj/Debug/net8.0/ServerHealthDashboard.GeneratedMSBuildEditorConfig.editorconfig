@@ -27,6 +27,10 @@ build_property.EnableCodeStyleSeverity =
 build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xBcHAucmF6b3I=
 build_metadata.AdditionalFiles.CssScope = 
 
+[C:/Code/1-Portfolio/ServerHealthDashboard/ServerHealthDashboard/Components/Graphs/MemoryUsageChart.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xHcmFwaHNcTWVtb3J5VXNhZ2VDaGFydC5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = 
+
 [C:/Code/1-Portfolio/ServerHealthDashboard/ServerHealthDashboard/Components/Graphs/PerCoreUsageBarChart.razor]
 build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xHcmFwaHNcUGVyQ29yZVVzYWdlQmFyQ2hhcnQucmF6b3I=
 build_metadata.AdditionalFiles.CssScope = 

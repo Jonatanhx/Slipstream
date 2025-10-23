@@ -1,35 +1,37 @@
-﻿@implements IDisposable
-@inject ISystemMetricsService MetricsService
+﻿@inject ISystemMetricsService MetricsService
 @using ApexCharts
 @using ServerHealthDashboard.Services
 
-<ApexChart TItem="CoreDataPoint"
-            Title="Per Core CPU Usage"
-            Options="@options"
-            @ref="chart">
-    @foreach (var coreIndex in Enumerable.Range(0, numberOfCores))
-    {
-        var currentCore = coreIndex;
-        <ApexPointSeries TItem="CoreDataPoint"
-                            Items="@coreTimeSeriesData.Where(d => d.CoreIndex == currentCore).ToList()"
-                            Name="@($"Core {currentCore + 1}")"
-                            SeriesType="SeriesType.Line"
-                            XValue="@(e => e.Timestamp)"
-                            YValue="@(e => e.UsagePercent)"
-                            OrderBy="e => e.X" />
-    }
-</ApexChart>
+<div style="height: 100%; width: 100%; padding: 16px; background-color: #24272f; border-radius: 4px;">
+    <ApexChart TItem="CoreData"
+                Title="Per Core CPU Usage"
+                Options="@options"
+                @ref="chart">
+        @foreach (var coreIndex in Enumerable.Range(0, numberOfCores))
+        {
+            var currentCore = coreIndex;
+            <ApexPointSeries TItem="CoreData"
+                                Items="@coreData.Where(d => d.CoreIndex == currentCore).ToList()"
+                                Name="@($"Core {currentCore + 1}")"
+                                SeriesType="SeriesType.Line"
+                                XValue="@(e => e.Timestamp)"
+                                YValue="@(e => e.UsagePercent)"
+                                OrderBy="e => e.X" />
+        }
+    </ApexChart>
+</div>
 
 @code {
-    private List<CoreDataPoint> coreTimeSeriesData = new();
-    private ApexChartOptions<CoreDataPoint> options;
-    private ApexChart<CoreDataPoint>? chart;
+    private List<CoreData> coreData = new();
+    private ApexChartOptions<CoreData> options = new();
+    private ApexChart<CoreData>? chart;
     private CpuMetrics? cpuMetrics;
     private System.Threading.Timer? timer;
     private int numberOfCores = 0;
     private const int MaxDataPoints = 20;
+    private bool isRendered = false;
 
-    public class CoreDataPoint
+    public class CoreData
     {
         public int CoreIndex { get; set; }
         public DateTime Timestamp { get; set; }
@@ -40,15 +42,26 @@
     {
         await LoadCpuMetrics();
         ConfigureChartOptions();
+    }
 
-        timer = new System.Threading.Timer(async _ =>
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
         {
-            await InvokeAsync(async () =>
+            isRendered = true;
+
+            timer = new System.Threading.Timer(async _ =>
             {
-                await LoadCpuMetrics();
-                StateHasChanged();
-            });
-        }, null, TimeSpan.FromSeconds(2), TimeSpan.FromSeconds(2));
+                if (isRendered && chart != null)
+                {
+                    await InvokeAsync(async () =>
+                    {
+                        await LoadCpuMetrics();
+                        StateHasChanged();
+                    });
+                }
+            }, null, TimeSpan.FromSeconds(2), TimeSpan.FromSeconds(2));
+        }
     }
 
     private async Task LoadCpuMetrics()
@@ -61,7 +74,7 @@
             var timestamp = DateTime.Now;
 
             var newDataPoints = cpuMetrics.PerCoreUsage
-                .Select((usage, index) => new CoreDataPoint
+                .Select((usage, index) => new CoreData
                 {
                     CoreIndex = index,
                     Timestamp = timestamp,
@@ -69,15 +82,15 @@
                 })
                 .ToList();
 
-            coreTimeSeriesData.AddRange(newDataPoints);
+            coreData.AddRange(newDataPoints);
 
-            coreTimeSeriesData = coreTimeSeriesData
+            coreData = coreData
                 .GroupBy(d => d.CoreIndex)
                 .SelectMany(g => g.OrderByDescending(d => d.Timestamp).Take(MaxDataPoints))
                 .OrderBy(d => d.Timestamp)
                 .ToList();
 
-            if (chart != null)
+            if (isRendered && chart != null)
             {
                 await chart.UpdateSeriesAsync(true);
             }
@@ -86,7 +99,7 @@
 
     private void ConfigureChartOptions()
     {
-        options = new ApexChartOptions<CoreDataPoint>
+        options = new ApexChartOptions<CoreData>
         {
             Chart = new Chart
             {
@@ -99,7 +112,8 @@
                     Enabled = false,
                 },
                 Background = "#24272f",
-                Height = "100%"
+                Height = "100%",
+                Width = "100%"
             },
             DataLabels = new ApexCharts.DataLabels
             {
@@ -172,10 +186,5 @@
                 Intersect = false,
             }
         };
-    }
-
-    public void Dispose()
-    {
-        timer?.Dispose();
     }
 }
