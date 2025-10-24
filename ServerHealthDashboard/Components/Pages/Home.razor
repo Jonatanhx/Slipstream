@@ -3,8 +3,8 @@
 
 <PageTitle>Dashboard</PageTitle>
 
-<main style="display: flex; flex-direction: column; height: 100vh;">
-    <div style="display: flex; min-height: 400px; gap: 0.5em; padding: 8px;">
+<main style="display: flex; flex-direction: column; min-height: 100vh;">
+    <section style="display: flex; height: 400px; gap: 0.5em; padding: 8px;">
         <div style="display:flex; flex: 1; height: 100%;">
             <PerCoreUsageBarChart />
         </div>
@@ -14,5 +14,10 @@
         <div style="display:flex; height: 100%;">
             <MemoryUsageChart />
         </div>
-    </div>
+    </section>
+    <section style="display: flex; height: 650px; gap: 0.5em; padding: 8px;">
+        <div style="display:flex; height: 100%; min-width: 30%">
+            <ProcessesMetricsHeatmap />
+        </div>
+    </section>
 </main>

@@ -1,0 +1,135 @@
+﻿@inject ISystemMetricsService MetricsService
+@using ApexCharts
+@using ServerHealthDashboard.Services
+
+<div style="height: 100%; width: 100%; padding: 16px; background-color: #24272f; border-radius: 4px;">
+        <ApexChart TItem="MetricValue"
+                   Title="Processes Resource Utilization"
+                   Options="options"
+                   Height="600">
+            @foreach (var process in processesData)
+            {
+                <ApexPointSeries TItem="MetricValue"
+                                 Items="@GetMetricsForProcess(process)"
+                                 Name="@process.Name"
+                                 SeriesType="SeriesType.Heatmap"
+                                 XValue="@(e => e.MetricName)"
+                                 YValue="@(e => e.Value)" />
+            }
+        </ApexChart>
+</div>
+
+@code {
+    private List<ProcessesData> processesData = new();
+    private ApexChartOptions<MetricValue> options = new();
+
+    private class ProcessesData
+    {
+        public int ProcessId { get; set; }
+        public string Name { get; set; } = string.Empty;
+        public double CpuUsage { get; set; }
+        public double MemoryMB { get; set; }
+        public double IoKBps { get; set; }
+        public int Threads { get; set; }
+    }
+
+    private class MetricValue
+    {
+        public string MetricName { get; set; } = string.Empty;
+        public decimal Value { get; set; }
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        var processes = await MetricsService.GetProcessesMetricsAsync();
+
+        processesData = processes.Take(10).Select(p => new ProcessesData
+        {
+            ProcessId = p.ProcessId,
+            Name = p.Name,
+            CpuUsage = p.CpuUsage,
+            MemoryMB = p.MemoryMB,
+            IoKBps = p.IoKBps,
+            Threads = p.Threads
+        }).ToList();
+
+        ConfigureChartOptions();
+    }
+
+    private List<MetricValue> GetMetricsForProcess(ProcessesData process)
+    {
+        return new List<MetricValue>
+        {
+            new MetricValue { MetricName = "CPU %", Value = (decimal)process.CpuUsage },
+            new MetricValue { MetricName = "Memory (MB)", Value = (decimal)Math.Min(process.MemoryMB / 10, 100) }, // Normalize
+            new MetricValue { MetricName = "IO (KB/s)", Value = (decimal)Math.Min(process.IoKBps / 10, 100) }, // Normalize
+            new MetricValue { MetricName = "Threads", Value = (decimal)Math.Min(process.Threads, 100) } // Cap at 100
+        };
+    }
+
+    private void ConfigureChartOptions()
+    {
+        options = new ApexChartOptions<MetricValue>
+        {
+            Theme = new Theme
+            {
+                Mode = Mode.Dark
+            },
+            Chart = new Chart
+            {
+                Background = "#24272f",
+                Toolbar = new Toolbar
+                {
+                    Show = true
+                }
+            },
+            PlotOptions = new PlotOptions
+            {
+                Heatmap = new PlotOptionsHeatmap
+                {
+                    ColorScale = new PlotOptionsHeatmapColorScale
+                    {
+                        Ranges = new List<PlotOptionsHeatmapColorScaleRange>
+                        {
+                            new PlotOptionsHeatmapColorScaleRange { From = 0, To = 20, Color = "#00A100", Name = "Low" },
+                            new PlotOptionsHeatmapColorScaleRange { From = 20, To = 50, Color = "#128FD9", Name = "Medium" },
+                            new PlotOptionsHeatmapColorScaleRange { From = 50, To = 75, Color = "#FFB200", Name = "High" },
+                            new PlotOptionsHeatmapColorScaleRange { From = 75, To = 100, Color = "#FF0000", Name = "Critical" }
+                        }
+                    }
+                }
+            },
+            Xaxis = new XAxis
+            {
+                Labels = new XAxisLabels
+                {
+                    Style = new AxisLabelStyle
+                    {
+                        Colors = new List<string> { "#ffffff" }
+                    }
+                }
+            },
+            Yaxis = new List<YAxis>
+            {
+                new YAxis
+                {
+                    Labels = new YAxisLabels
+                    {
+                        Style = new AxisLabelStyle
+                        {
+                            Colors = new List<string> { "#ffffff" }
+                        }
+                    }
+                }
+            },
+            DataLabels = new DataLabels
+            {
+                Enabled = true,
+                Style = new DataLabelsStyle
+                {
+                    Colors = new List<string> { "#ffffff" }
+                }
+            }
+        };
+    }
+}
