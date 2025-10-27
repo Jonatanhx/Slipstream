@@ -5,7 +5,8 @@
 <div style="height: 100%; width: 100%; padding: 16px; background-color: #24272f; border-radius: 4px;">
     <ApexChart TItem="MemoryData"
                Title="Memory Usage"
-               Options="@options">
+               Options="@options"
+               @ref="chart">
 
         <ApexPointSeries TItem="MemoryData"
                          Items="memoryData"
@@ -20,6 +21,8 @@
 @code {
     private List<MemoryData> memoryData = new();
     private ApexChartOptions<MemoryData> options = new();
+    private System.Threading.Timer? timer;
+    private ApexChart<MemoryData>? chart;
 
     private class MemoryData
     {
@@ -29,14 +32,34 @@
 
     protected override async Task OnInitializedAsync()
     {
-        var metrics = await MetricsService.GetMemoryMetricsAsync();
         ConfigureChartOptions();
-
+        var metrics = await MetricsService.GetMemoryMetricsAsync();
         memoryData = new List<MemoryData>
         {
             new MemoryData { Label = "Used", Value = metrics.UsedPhysical / (1024.0 * 1024.0 * 1024.0) },
             new MemoryData { Label = "Available", Value = metrics.AvailablePhysical / (1024.0 * 1024.0 * 1024.0) }
         };
+
+        timer = new System.Threading.Timer(async _ =>
+        {
+            await InvokeAsync(async () =>
+            {
+                var newMetrics = await MetricsService.GetMemoryMetricsAsync();
+
+                memoryData = new List<MemoryData>
+                {
+                    new MemoryData { Label = "Used", Value = newMetrics.UsedPhysical / (1024.0 * 1024.0 * 1024.0) },
+                    new MemoryData { Label = "Available", Value = newMetrics.AvailablePhysical / (1024.0 * 1024.0 * 1024.0) }
+                };
+
+                if (chart != null)
+                {
+                    await chart.UpdateSeriesAsync(true);
+                }
+
+                StateHasChanged();
+            });
+        }, null, TimeSpan.FromSeconds(2), TimeSpan.FromSeconds(2));
     }
 
     private void ConfigureChartOptions()
@@ -55,9 +78,13 @@
                     Floating = false,
                     OffsetY = 0
                 },
+                Stroke = new Stroke
+                {
+                    Width = 0
+                },
                 Colors = new List<string>
                 {
-                    "#00E396", "#24272f",
+                    "#00E396", "#008FFB",
                 },
                 Tooltip = new ApexCharts.Tooltip
                 {
