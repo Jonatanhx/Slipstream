@@ -2,7 +2,7 @@
 @using ApexCharts
 @using ServerHealthDashboard.Services
 
-<div style="height: 100%; width: 100%; padding: 16px; background-color: #24272f; border-radius: 4px;">
+<div style="height: 100%; width: 100%; background-color: #24272f;">
         <ApexChart TItem="MetricValue"
                    Title="Processes Resource Utilization"
                    Options="options"
@@ -94,7 +94,7 @@
                             new PlotOptionsHeatmapColorScaleRange { From = 0, To = 20, Color = "#00A100", Name = "Low" },
                             new PlotOptionsHeatmapColorScaleRange { From = 20, To = 50, Color = "#128FD9", Name = "Medium" },
                             new PlotOptionsHeatmapColorScaleRange { From = 50, To = 75, Color = "#FFB200", Name = "High" },
-                            new PlotOptionsHeatmapColorScaleRange { From = 75, To = 100, Color = "#FF0000", Name = "Critical" }
+                            new PlotOptionsHeatmapColorScaleRange { From = 75, To = 1000, Color = "#FF0000", Name = "Critical" }
                         }
                     }
                 }

@@ -90,7 +90,7 @@ namespace ServerHealthDashboard.Services
                     throw new PlatformNotSupportedException("Process metrics are only available on Windows systems.");
                 }
 
-                var result = new List<ProcessesMetrics>();
+                var processes = new List<ProcessesMetrics>();
                 var category = new PerformanceCounterCategory("Process");
                 var instances = category.GetInstanceNames();
 
@@ -98,44 +98,75 @@ namespace ServerHealthDashboard.Services
                 {
                     if (instance.Equals("Idle", StringComparison.OrdinalIgnoreCase) ||
                         instance.Equals("_Total", StringComparison.OrdinalIgnoreCase))
+                        continue;
+
+                    try
+                    {
+                        using var idCounter = new PerformanceCounter("Process", "ID Process", instance, true);
+                        int pid = (int)idCounter.NextValue();
+                        if (pid == 0) continue;
+
+                        Process process;
+                        try
+                        {
+                            process = Process.GetProcessById(pid);
+                        }
+                        catch
+                        {
+                            continue;
+                        }
+
+                        using var cpuCounter = new PerformanceCounter("Process", "% Processor Time", instance, true);
+                        using var memCounter = new PerformanceCounter("Process", "Working Set - Private", instance, true);
+                        using var ioCounter = new PerformanceCounter("Process", "IO Data Bytes/sec", instance, true);
+                        using var threadCounter = new PerformanceCounter("Process", "Thread Count", instance, true);
+
+                        if (!PerformanceCounterCategory.InstanceExists(instance, "Process"))
+                            continue;
+
+                        cpuCounter.NextValue();
+                        var cpuUsage = cpuCounter.NextValue() / Environment.ProcessorCount;
+                        var memUsage = memCounter.NextValue() / (1024 * 1024);
+                        var ioUsage = ioCounter.NextValue() / 1024;
+                        var threadCount = (int)threadCounter.NextValue();
+
+                        if (cpuUsage > 0.1 || memUsage > 5)
+                        {
+                            processes.Add(new ProcessesMetrics
+                            {
+                                ProcessId = pid,
+                                Name = process.ProcessName,
+                                CpuUsage = Math.Round(cpuUsage, 1),
+                                MemoryMB = Math.Round(memUsage, 1),
+                                IoKBps = Math.Round(ioUsage, 1),
+                                Threads = threadCount
+                            });
+                        }
+                    }
+                    catch (InvalidOperationException)
                     {
                         continue;
                     }
-
-                    using var idCounter = new PerformanceCounter("Process", "ID Process", instance, true);
-                    int pid = (int)idCounter.NextValue();
-
-                    if (pid == 0) continue;
-
-                    var process = Process.GetProcessById(pid);
-                    if (process == null) continue;
-
-                    using var cpuCounter = new PerformanceCounter("Process", "% Processor Time", instance, true);
-                    using var memCounter = new PerformanceCounter("Process", "Working Set - Private", instance, true);
-                    using var ioCounter = new PerformanceCounter("Process", "IO Data Bytes/sec", instance, true);
-                    using var threadCounter = new PerformanceCounter("Process", "Thread Count", instance, true);
-
-                    cpuCounter.NextValue();
-
-                    var cpuUsage = cpuCounter.NextValue() / Environment.ProcessorCount;
-                    var memUsage = memCounter.NextValue() / (1024 * 1024);
-                    var ioUsage = ioCounter.NextValue() / 1024;
-                    var threadCount = (int)threadCounter.NextValue();
-
-                    if (cpuUsage > 0.1 || memUsage > 5)
+                    catch (Exception)
                     {
-                        result.Add(new ProcessesMetrics
-                        {
-                            ProcessId = pid,
-                            Name = process.ProcessName,
-                            CpuUsage = Math.Round(cpuUsage, 1),
-                            MemoryMB = Math.Round(memUsage, 1),
-                            IoKBps = Math.Round(ioUsage, 1),
-                            Threads = threadCount
-                        });
+                        continue;
                     }
                 }
-                return result.OrderByDescending(p => p.CpuUsage).ToList();
+
+                var uniqueProcesses = processes
+                .GroupBy(p => p.Name)
+                .Select(g => new ProcessesMetrics
+                {
+                ProcessId = g.First().ProcessId,
+                Name = g.Key,
+                CpuUsage = Math.Round(g.Sum(p => p.CpuUsage), 1),
+                MemoryMB = Math.Round(g.Sum(p => p.MemoryMB), 1),
+                IoKBps = Math.Round(g.Sum(p => p.IoKBps), 1),
+                Threads = g.Sum(p => p.Threads)
+                })
+                .OrderByDescending(p => p.CpuUsage)
+                .ToList();
+                return uniqueProcesses;
             });
         }
     }

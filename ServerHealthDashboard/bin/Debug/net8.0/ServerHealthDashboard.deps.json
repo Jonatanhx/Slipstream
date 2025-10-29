@@ -9,8 +9,7 @@
       "ServerHealthDashboard/1.0.0": {
         "dependencies": {
           "Blazor-ApexCharts": "6.0.2",
-          "Hardware.Info": "101.1.0",
-          "MudBlazor": "8.13.0"
+          "Hardware.Info": "101.1.0"
         },
         "runtime": {
           "ServerHealthDashboard.dll": {}
@@ -179,28 +178,6 @@
           }
         }
       },
-      "Microsoft.Extensions.Localization/8.0.12": {
-        "dependencies": {
-          "Microsoft.Extensions.DependencyInjection.Abstractions": "8.0.2",
-          "Microsoft.Extensions.Localization.Abstractions": "8.0.12",
-          "Microsoft.Extensions.Logging.Abstractions": "8.0.3",
-          "Microsoft.Extensions.Options": "8.0.2"
-        },
-        "runtime": {
-          "lib/net8.0/Microsoft.Extensions.Localization.dll": {
-            "assemblyVersion": "8.0.0.0",
-            "fileVersion": "8.0.1224.60312"
-          }
-        }
-      },
-      "Microsoft.Extensions.Localization.Abstractions/8.0.12": {
-        "runtime": {
-          "lib/net8.0/Microsoft.Extensions.Localization.Abstractions.dll": {
-            "assemblyVersion": "8.0.0.0",
-            "fileVersion": "8.0.1224.60312"
-          }
-        }
-      },
       "Microsoft.Extensions.Logging/8.0.1": {
         "dependencies": {
           "Microsoft.Extensions.DependencyInjection": "8.0.1",
@@ -260,19 +237,6 @@
         "dependencies": {
           "System.Security.AccessControl": "5.0.0",
           "System.Security.Principal.Windows": "5.0.0"
-        }
-      },
-      "MudBlazor/8.13.0": {
-        "dependencies": {
-          "Microsoft.AspNetCore.Components": "8.0.13",
-          "Microsoft.AspNetCore.Components.Web": "8.0.13",
-          "Microsoft.Extensions.Localization": "8.0.12"
-        },
-        "runtime": {
-          "lib/net8.0/MudBlazor.dll": {
-            "assemblyVersion": "8.13.0.0",
-            "fileVersion": "8.13.0.0"
-          }
         }
       },
       "System.CodeDom/8.0.0": {
@@ -470,20 +434,6 @@
       "path": "microsoft.extensions.http/8.0.1",
       "hashPath": "microsoft.extensions.http.8.0.1.nupkg.sha512"
     },
-    "Microsoft.Extensions.Localization/8.0.12": {
-      "type": "package",
-      "serviceable": true,
-      "sha512": "sha512-Ef7P8kpJzX/khXB8oYxt3vFHXw48uWY+NirCrh8u8gokCHxr/Noc3OxME+Ji1ugqoMvUVSPu73mYctmUMDlOCA==",
-      "path": "microsoft.extensions.localization/8.0.12",
-      "hashPath": "microsoft.extensions.localization.8.0.12.nupkg.sha512"
-    },
-    "Microsoft.Extensions.Localization.Abstractions/8.0.12": {
-      "type": "package",
-      "serviceable": true,
-      "sha512": "sha512-bgwe0gy9v12hr6gLAXIeEWaTYm295Nfmp7B/DLmS75GBJXvs4JHn7pi8gn3jXMNNkNIkx9iWG+pXKmLAmjdGZg==",
-      "path": "microsoft.extensions.localization.abstractions/8.0.12",
-      "hashPath": "microsoft.extensions.localization.abstractions.8.0.12.nupkg.sha512"
-    },
     "Microsoft.Extensions.Logging/8.0.1": {
       "type": "package",
       "serviceable": true,
@@ -539,13 +489,6 @@
       "sha512": "sha512-dDoKi0PnDz31yAyETfRntsLArTlVAVzUzCIvvEDsDsucrl33Dl8pIJG06ePTJTI3tGpeyHS9Cq7Foc/s4EeKcg==",
       "path": "microsoft.win32.registry/5.0.0",
       "hashPath": "microsoft.win32.registry.5.0.0.nupkg.sha512"
-    },
-    "MudBlazor/8.13.0": {
-      "type": "package",
-      "serviceable": true,
-      "sha512": "sha512-Y6JW93zf8tiVhMSkkL0mZ3ruqjOTNftvVoX3sik6NEnIye+Gs0FXI8rhXfrH2LU79Mw/fOtT5ms3L/Q4TKx2kA==",
-      "path": "mudblazor/8.13.0",
-      "hashPath": "mudblazor.8.13.0.nupkg.sha512"
     },
     "System.CodeDom/8.0.0": {
       "type": "package",

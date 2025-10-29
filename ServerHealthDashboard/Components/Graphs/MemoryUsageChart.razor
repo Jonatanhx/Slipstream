@@ -2,7 +2,7 @@
 @using ApexCharts
 @using ServerHealthDashboard.Services
 
-<div style="height: 100%; width: 100%; padding: 16px; background-color: #24272f; border-radius: 4px;">
+<div style="height: 100%; width: 100%; background-color: #24272f;">
     <ApexChart TItem="MemoryData"
                Title="Memory Usage"
                Options="@options"
@@ -66,6 +66,10 @@
     {
         options = new ApexChartOptions<MemoryData>
             {
+                Theme = new Theme
+                {
+                    Mode = Mode.Dark
+                },
                 Chart = new Chart
                 {
                     Height = "100%",

@@ -1,102 +1,154 @@
 ﻿@inject ISystemMetricsService MetricsService
+@using ApexCharts
 @using ServerHealthDashboard.Services
 
-<div style="height: 100%; width: 100%; padding: 16px; background-color: #24272f; border-radius: 4px;">
-    <MudPaper Class="doc-section-component-container pa-4" Style="height:100%; background-color:#24272f;">
-        <MudText Typo="Typo.h4">CPU usage</MudText>
-        <MudTimeSeriesChart ChartSeries="@_series"
-                            @bind-SelectedIndex="_index"
-                            Width="@_width"
-                            Height="@_height"
-                            ChartOptions="@_options"
-                            AxisChartOptions="@_axisChartOptions"
-                            TimeLabelSpacing="TimeSpan.FromMinutes(5)"
-                            TimeLabelSpacingRounding="_roundedLabelSpacing"
-                            TimeLabelSpacingRoundingPadSeries="_roundedLabelSpacingPadSeries"
-                            DataMarkerTooltipTimeLabelFormat="yyyy MMM dd HH:mm:ss" />
-    </MudPaper>
+<div style="height: 100%; width: 100%; background-color: #24272f;">
+    <ApexChart TItem="CpuData"
+                   Title="Processes Resource Utilization"
+                   Options="options">
+        <ApexPointSeries TItem="CpuData"
+                                 Items="data"
+                                 Name="CPU"
+                                 SeriesType="SeriesType.Line"
+                                 XValue="@(e => e.Name)"
+                                 YValue="@(e => Math.Round((decimal)e.Usage))"/>
+        </ApexChart>
 </div>
 
 @code
 {
     private int _index = -1;
-    private ChartOptions _options = new ChartOptions
-        {
-            YAxisLines = false,
-            YAxisTicks = 10,
-            MaxNumYAxisTicks = 10,
-            YAxisRequireZeroPoint = true,
-            XAxisLines = false,
-            LineStrokeWidth = 1,
-            ShowLegend = false,
-            YAxisFormat = "0'%'",
-            };
-
-    private AxisChartOptions _axisChartOptions = new()
-    {};
-
-    private TimeSeriesChartSeries _chart1 = new();
-
-    private List<TimeSeriesChartSeries> _series = new();
-
-    private readonly Random _random = new Random();
-
-    private bool _roundedLabelSpacing = false;
-    private bool _roundedLabelSpacingPadSeries = false;
-
-    private string _width = "100%";
-    private string _height = "100%";
-    private const int MaxDataPoints = 360;
-    private CpuMetrics? cpuMetrics;
+    private List<CpuData> data = new();
+    private ApexChartOptions<CpuData> options = new();
     private System.Threading.Timer? timer;
+    private ApexChart<CpuData>? chart;
 
-    protected override void OnInitialized()
+    public class CpuData
     {
-        base.OnInitialized();
-
-        var now = DateTime.Now;
-        _chart1 = new TimeSeriesChartSeries
-            {
-                Index = 0,
-                Data = new List<TimeSeriesChartSeries.TimeValue>(),
-                LineDisplayType = LineDisplayType.Line,
-                DataMarkerTooltipTitleFormat = "{{X_VALUE}}",
-                DataMarkerTooltipSubtitleFormat = "{{Y_VALUE}}%"
-            };
-        _series.Add(_chart1);
-        StateHasChanged();
+        public double Usage { get; set; }
+        public string Name { get; set; } = string.Empty;
     }
+
 
     protected override async Task OnInitializedAsync()
     {
-        await RefreshMetrics();
+        ConfigureChartOptions();
+        var metrics = await MetricsService.GetCpuMetricsAsync();
+        data = new List<CpuData>
+        {
+            new CpuData { Usage = metrics.Usage, Name = metrics.Name },
+        };
 
         timer = new System.Threading.Timer(async _ =>
         {
-            await RefreshMetrics();
-            await InvokeAsync(StateHasChanged);
-            await UpdateGraph();
+            await InvokeAsync(async () =>
+            {
+                var newMetrics = await MetricsService.GetMemoryMetricsAsync();
+
+                data = new List<CpuData>
+                {
+                     new CpuData { Usage = metrics.Usage, Name = metrics.Name }
+                };
+
+                if (chart != null)
+                {
+                    await chart.UpdateSeriesAsync(true);
+                }
+
+                StateHasChanged();
+            });
         }, null, TimeSpan.FromSeconds(2), TimeSpan.FromSeconds(2));
     }
 
-    private async Task UpdateGraph()
+   
+
+    private void ConfigureChartOptions()
     {
-        if (cpuMetrics == null) return;
+        options = new ApexChartOptions<CpuData>
+            {
+                Theme = new Theme
+                {
+                    Mode = Mode.Dark
+                },
+                Chart = new Chart
+                {
+                    Toolbar = new Toolbar
+                    {
+                        Show = false
+                    },
+                    Animations = new Animations
+                    {
+                        Enabled = false,
+                    },
+                    Background = "#24272f",
+                    Height = "100%",
+                    Width = "100%"
+                },
+                DataLabels = new ApexCharts.DataLabels
+                {
+                    Enabled = false
+                },
+                Stroke = new Stroke
+                {
+                    Curve = Curve.Straight,
+                    Width = 1.5
+                },
+                Grid = new Grid
+                {
+                    BorderColor = "#2f333d",
+                    Row = new GridRow
+                    {
+                        Colors = new List<string> { "#3a3f4c", "transparent" },
+                        Opacity = 0.5d
+                    }
+                },
+                Markers = new Markers
+                {
+                    Size = 0,
+                    Hover = new MarkersHover
+                    {
+                        SizeOffset = 6
+                    }
+                },
+                Yaxis = new List<YAxis>
+                {
+                    new YAxis
+                    {
+                        Title = new AxisTitle { Text = "CPU Usage (%)" },
+                        Min = 0,
+                        Max = 100,
+                        TickAmount = 5,
+                        Labels = new YAxisLabels
+                        {
+                            Formatter = "function(val) { return val.toFixed(0) + '%'; }"
+                        }
+                    }
 
-        var now = DateTime.Now;
-        var newDataPoint = new TimeSeriesChartSeries.TimeValue(now, cpuMetrics.Usage);
-
-        _chart1.Data.Add(newDataPoint);
-
-        if (_chart1.Data.Count > MaxDataPoints)
-        {
-            _chart1.Data.RemoveAt(0);
-        }
-    }
-
-    private async Task RefreshMetrics()
-    {
-        cpuMetrics = await MetricsService.GetCpuMetricsAsync();
+                },
+                Xaxis = new XAxis
+                {
+                    Title = new AxisTitle { Text = "Time" },
+                    Type = XAxisType.Datetime,
+                    Labels = new XAxisLabels
+                    {
+                        RotateAlways = false,
+                        Rotate = -45,
+                        Format = "HH:mm"
+                    }
+                },
+                Legend = new Legend
+                {
+                    Position = LegendPosition.Top,
+                    HorizontalAlign = ApexCharts.Align.Center,
+                    Floating = false,
+                    OffsetY = 0
+                },
+                Tooltip = new ApexCharts.Tooltip
+                {
+                    Shared = true,
+                    Intersect = false,
+                }
+            };
     }
 
     public void Dispose()

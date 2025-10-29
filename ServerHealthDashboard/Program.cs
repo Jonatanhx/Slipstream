@@ -1,9 +1,7 @@
-using MudBlazor.Services;
 using ServerHealthDashboard.Components;
 using ServerHealthDashboard.Services;
 
 var builder = WebApplication.CreateBuilder(args);
-builder.Services.AddMudServices();
 
 // Add services to the container.
 builder.Services.AddRazorComponents()
@@ -22,7 +20,7 @@ if (!app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-app.UseStaticFiles();
+app.MapStaticAssets();
 app.UseAntiforgery();
 
 app.MapRazorComponents<App>()

@@ -1,0 +1,7 @@
+wwwroot\app.css
+wwwroot\bootstrap\bootstrap.min.css
+wwwroot\bootstrap\bootstrap.min.css.map
+wwwroot\favicon.png
+C:\Code\1-Portfolio\ServerHealthDashboard\ServerHealthDashboard\wwwroot\app.css
+C:\Code\1-Portfolio\ServerHealthDashboard\ServerHealthDashboard\wwwroot\bootstrap\bootstrap.min.css
+C:\Code\1-Portfolio\ServerHealthDashboard\ServerHealthDashboard\wwwroot\bootstrap\bootstrap.min.css.map
