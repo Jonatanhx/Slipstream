@@ -1,6 +1,7 @@
 ﻿@inject ISystemMetricsService MetricsService
 @using ApexCharts
 @using ServerHealthDashboard.Services
+@implements IDisposable
 
 <div class="slp-graph-container">
     <ApexChart TItem="CpuData"

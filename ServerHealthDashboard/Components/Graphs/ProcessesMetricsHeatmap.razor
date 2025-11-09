@@ -1,35 +1,35 @@
 ﻿@inject ISystemMetricsService MetricsService
 @using ApexCharts
 @using ServerHealthDashboard.Services
+@implements IDisposable
 
 <div class="slp-graph-container">
-        <ApexChart TItem="MetricValue"
-                   Title="Processes Resource Utilization"
-                   Options="options">
-            @foreach (var process in processesData)
-            {
-                <ApexPointSeries TItem="MetricValue"
-                                 Items="@GetMetricsForProcess(process)"
-                                 Name="@process.Name"
-                                 SeriesType="SeriesType.Heatmap"
-                                 XValue="@(e => e.MetricName)"
-                                 YValue="@(e => e.Value)" />
-            }
-        </ApexChart>
+    <ApexChart TItem="MetricValue"
+               Title="Processes Resource Utilization"
+               Options="options"
+               @ref="chart">
+        @foreach (var process in processesData)
+        {
+            <ApexPointSeries TItem="MetricValue"
+                             Items="@process.Metrics"
+                             Name="@process.Name"
+                             SeriesType="SeriesType.Heatmap"
+                             XValue="@(e => e.MetricName)"
+                             YValue="@(e => e.Value)" />
+        }
+    </ApexChart>
 </div>
 
 @code {
     private List<ProcessesData> processesData = new();
     private ApexChartOptions<MetricValue> options = new();
+    private ApexChart<MetricValue>? chart;
+    private System.Threading.Timer? timer;
 
     private class ProcessesData
     {
-        public int ProcessId { get; set; }
         public string Name { get; set; } = string.Empty;
-        public double CpuUsage { get; set; }
-        public double MemoryMB { get; set; }
-        public double IoKBps { get; set; }
-        public int Threads { get; set; }
+        public List<MetricValue> Metrics { get; set; } = new();
     }
 
     private class MetricValue
@@ -40,30 +40,77 @@
 
     protected override async Task OnInitializedAsync()
     {
-        var processes = await MetricsService.GetProcessesMetricsAsync();
-
-        processesData = processes.Take(10).Select(p => new ProcessesData
-        {
-            ProcessId = p.ProcessId,
-            Name = p.Name,
-            CpuUsage = p.CpuUsage,
-            MemoryMB = p.MemoryMB,
-            IoKBps = p.IoKBps,
-            Threads = p.Threads
-        }).ToList();
-
         ConfigureChartOptions();
+        await LoadProcessesMetrics();
     }
 
-    private List<MetricValue> GetMetricsForProcess(ProcessesData process)
+    protected override Task OnAfterRenderAsync(bool firstRender)
     {
-        return new List<MetricValue>
+        if (firstRender && processesData.Any())
         {
-            new MetricValue { MetricName = "CPU %", Value = (decimal)process.CpuUsage },
-            new MetricValue { MetricName = "Memory (MB)", Value = (decimal)Math.Min(process.MemoryMB / 10, 100) },
-            new MetricValue { MetricName = "IO (KB/s)", Value = (decimal)Math.Min(process.IoKBps / 10, 100) },
-            new MetricValue { MetricName = "Threads", Value = (decimal)Math.Min(process.Threads, 100) }
-        };
+            timer = new System.Threading.Timer(async _ =>
+            {
+                await InvokeAsync(async () =>
+                {
+                    await UpdateProcessesMetrics();
+                });
+            }, null, TimeSpan.FromSeconds(2), TimeSpan.FromSeconds(2));
+        }
+
+        return Task.CompletedTask;
+    }
+
+    private async Task LoadProcessesMetrics()
+    {
+        var processesMetrics = await MetricsService.GetProcessesMetricsAsync();
+
+        if (processesMetrics != null && processesMetrics.Any())
+        {
+            processesData = processesMetrics
+                .Take(10)
+                .Select(p => new ProcessesData
+                {
+                    Name = p.Name,
+                    Metrics = new List<MetricValue>
+                    {
+                        new MetricValue { MetricName = "CPU %", Value = (decimal)p.CpuUsage },
+                        new MetricValue { MetricName = "Memory (MB)", Value = (decimal)Math.Min(p.MemoryMB / 10, 100) },
+                        new MetricValue { MetricName = "IO (KB/s)", Value = (decimal)Math.Min(p.IoKBps / 10, 100) },
+                        new MetricValue { MetricName = "Threads", Value = (decimal)Math.Min(p.Threads, 100) }
+                    }
+                }).ToList();
+        }
+    }
+
+    private async Task UpdateProcessesMetrics()
+    {
+        var processesMetrics = await MetricsService.GetProcessesMetricsAsync();
+
+        if (processesMetrics != null && processesMetrics.Any())
+        {
+            var newData = processesMetrics
+                .Take(10)
+                .Select(p => new ProcessesData
+                {
+                    Name = p.Name,
+                    Metrics = new List<MetricValue>
+                    {
+                        new MetricValue { MetricName = "CPU %", Value = (decimal)p.CpuUsage },
+                        new MetricValue { MetricName = "Memory (MB)", Value = (decimal)Math.Min(p.MemoryMB / 10, 100) },
+                        new MetricValue { MetricName = "IO (KB/s)", Value = (decimal)Math.Min(p.IoKBps / 10, 100) },
+                        new MetricValue { MetricName = "Threads", Value = (decimal)Math.Min(p.Threads, 100) }
+                    }
+                }).ToList();
+
+            processesData = newData;
+
+            if (chart != null)
+            {
+                await chart.UpdateSeriesAsync(true);
+            }
+
+            StateHasChanged();
+        }
     }
 
     private void ConfigureChartOptions()
@@ -77,10 +124,20 @@
             Chart = new Chart
             {
                 Height = "100%",
+                Width = "100%",
                 Background = "#24272f",
                 Toolbar = new Toolbar
                 {
-                    Show = true
+                    Show = false
+                },
+                Animations = new Animations
+                {
+                    Enabled = true,
+                    Easing = Easing.Linear,
+                    DynamicAnimation = new DynamicAnimation
+                    {
+                        Speed = 1000
+                    }
                 }
             },
             PlotOptions = new PlotOptions
@@ -94,7 +151,7 @@
                             new PlotOptionsHeatmapColorScaleRange { From = 0, To = 20, Color = "#00A100", Name = "Low" },
                             new PlotOptionsHeatmapColorScaleRange { From = 20, To = 50, Color = "#128FD9", Name = "Medium" },
                             new PlotOptionsHeatmapColorScaleRange { From = 50, To = 75, Color = "#FFB200", Name = "High" },
-                            new PlotOptionsHeatmapColorScaleRange { From = 75, To = 1000, Color = "#FF0000", Name = "Critical" }
+                            new PlotOptionsHeatmapColorScaleRange { From = 75, To = 100, Color = "#FF0000", Name = "Critical" }
                         }
                     }
                 }
@@ -131,5 +188,10 @@
                 }
             }
         };
+    }
+
+    public void Dispose()
+    {
+        timer?.Dispose();
     }
 }
