@@ -2,11 +2,10 @@
 @using ApexCharts
 @using ServerHealthDashboard.Services
 
-<div style="height: 100%; width: 100%; background-color: #24272f;">
+<div class="slp-graph-container">
         <ApexChart TItem="MetricValue"
                    Title="Processes Resource Utilization"
-                   Options="options"
-                   Height="600">
+                   Options="options">
             @foreach (var process in processesData)
             {
                 <ApexPointSeries TItem="MetricValue"
@@ -61,9 +60,9 @@
         return new List<MetricValue>
         {
             new MetricValue { MetricName = "CPU %", Value = (decimal)process.CpuUsage },
-            new MetricValue { MetricName = "Memory (MB)", Value = (decimal)Math.Min(process.MemoryMB / 10, 100) }, // Normalize
-            new MetricValue { MetricName = "IO (KB/s)", Value = (decimal)Math.Min(process.IoKBps / 10, 100) }, // Normalize
-            new MetricValue { MetricName = "Threads", Value = (decimal)Math.Min(process.Threads, 100) } // Cap at 100
+            new MetricValue { MetricName = "Memory (MB)", Value = (decimal)Math.Min(process.MemoryMB / 10, 100) },
+            new MetricValue { MetricName = "IO (KB/s)", Value = (decimal)Math.Min(process.IoKBps / 10, 100) },
+            new MetricValue { MetricName = "Threads", Value = (decimal)Math.Min(process.Threads, 100) }
         };
     }
 
@@ -77,6 +76,7 @@
             },
             Chart = new Chart
             {
+                Height = "100%",
                 Background = "#24272f",
                 Toolbar = new Toolbar
                 {

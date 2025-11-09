@@ -96,7 +96,6 @@ C:\Code\1-Portfolio\ServerHealthDashboard\ServerHealthDashboard\obj\Debug\net9.0
 C:\Code\1-Portfolio\ServerHealthDashboard\ServerHealthDashboard\obj\Debug\net9.0\compressed\dko6y7plta-j4a4u2uj29.gz
 C:\Code\1-Portfolio\ServerHealthDashboard\ServerHealthDashboard\obj\Debug\net9.0\compressed\1j8oabzfj7-qz6clc5837.gz
 C:\Code\1-Portfolio\ServerHealthDashboard\ServerHealthDashboard\obj\Debug\net9.0\compressed\0g0tdqq8mx-ody88ncx6z.gz
-C:\Code\1-Portfolio\ServerHealthDashboard\ServerHealthDashboard\obj\Debug\net9.0\compressed\go82u69niu-nex4lgs0ev.gz
 C:\Code\1-Portfolio\ServerHealthDashboard\ServerHealthDashboard\obj\Debug\net9.0\compressed\mbyciu64ba-6gzpyzhau4.gz
 C:\Code\1-Portfolio\ServerHealthDashboard\ServerHealthDashboard\obj\Debug\net9.0\compressed\3anhec3g26-8inm30yfxf.gz
 C:\Code\1-Portfolio\ServerHealthDashboard\ServerHealthDashboard\obj\Debug\net9.0\compressed\fc7lnjqeur-a9hbnbhn6q.gz
@@ -112,3 +111,4 @@ C:\Code\1-Portfolio\ServerHealthDashboard\ServerHealthDashboard\obj\Debug\net9.0
 C:\Code\1-Portfolio\ServerHealthDashboard\ServerHealthDashboard\obj\Debug\net9.0\ServerHealthDashboard.pdb
 C:\Code\1-Portfolio\ServerHealthDashboard\ServerHealthDashboard\obj\Debug\net9.0\ServerHealthDashboard.genruntimeconfig.cache
 C:\Code\1-Portfolio\ServerHealthDashboard\ServerHealthDashboard\obj\Debug\net9.0\ref\ServerHealthDashboard.dll
+C:\Code\1-Portfolio\ServerHealthDashboard\ServerHealthDashboard\obj\Debug\net9.0\compressed\go82u69niu-szomou81q9.gz

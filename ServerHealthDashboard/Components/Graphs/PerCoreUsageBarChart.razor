@@ -2,7 +2,7 @@
 @using ApexCharts
 @using ServerHealthDashboard.Services
 
-<div style="height: 100%; width: 100%; background-color: #24272f;">
+<div class="slp-graph-container">
     <ApexChart TItem="CoreData"
                 Title="Per Core CPU Usage"
                 Options="@options"
@@ -29,7 +29,6 @@
     private System.Threading.Timer? timer;
     private int numberOfCores = 0;
     private const int MaxDataPoints = 20;
-    private bool isRendered = false;
 
     public class CoreData
     {
@@ -38,30 +37,22 @@
         public int UsagePercent { get; set; }
     }
 
-    protected override async Task OnInitializedAsync()
+    protected override Task OnInitializedAsync()
     {
-        await LoadCpuMetrics();
         ConfigureChartOptions();
-    }
 
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        if (firstRender)
+        timer = new System.Threading.Timer(async _ =>
         {
-            isRendered = true;
-
-            timer = new System.Threading.Timer(async _ =>
+            if (chart != null)
             {
-                if (isRendered && chart != null)
+                await InvokeAsync(async () =>
                 {
-                    await InvokeAsync(async () =>
-                    {
-                        await LoadCpuMetrics();
-                        StateHasChanged();
-                    });
-                }
-            }, null, TimeSpan.FromSeconds(2), TimeSpan.FromSeconds(2));
-        }
+                    await LoadCpuMetrics();
+                    StateHasChanged();
+                });
+            }
+        }, null, TimeSpan.FromSeconds(2), TimeSpan.FromSeconds(2));
+        return Task.CompletedTask;
     }
 
     private async Task LoadCpuMetrics()
@@ -90,7 +81,7 @@
                 .OrderBy(d => d.Timestamp)
                 .ToList();
 
-            if (isRendered && chart != null)
+            if (chart != null)
             {
                 await chart.UpdateSeriesAsync(true);
             }

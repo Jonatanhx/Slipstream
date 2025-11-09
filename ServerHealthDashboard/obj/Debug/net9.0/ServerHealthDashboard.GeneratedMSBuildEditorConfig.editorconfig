@@ -36,8 +36,8 @@ build_metadata.AdditionalFiles.CssScope =
 build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xHcmFwaHNcUHJvY2Vzc2VzTWV0cmljc0hlYXRtYXAucmF6b3I=
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Code/1-Portfolio/ServerHealthDashboard/ServerHealthDashboard/Components/Graphs/TimeSeriesChart.razor]
-build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xHcmFwaHNcVGltZVNlcmllc0NoYXJ0LnJhem9y
+[C:/Code/1-Portfolio/ServerHealthDashboard/ServerHealthDashboard/Components/Graphs/TotalCpuChart.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xHcmFwaHNcVG90YWxDcHVDaGFydC5yYXpvcg==
 build_metadata.AdditionalFiles.CssScope = 
 
 [C:/Code/1-Portfolio/ServerHealthDashboard/ServerHealthDashboard/Components/Layout/Aside.razor]

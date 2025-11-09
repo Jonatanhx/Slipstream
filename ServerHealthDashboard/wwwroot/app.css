@@ -77,3 +77,20 @@ h1:focus {
     color: #0d6efd !important;
     font-weight: bold;
 }
+
+.slp-graph-container {
+    height: 400px;
+    width: 100%;
+    background-color: #24272f;
+    padding: 16px;
+    border-radius: 4px;
+}
+
+.slp-graph-wrapper {
+    display: flex;
+    flex: 1;
+}
+.slp-graph-section {
+    display: flex;
+    gap: 0.5em;
+}

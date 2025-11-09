@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("ServerHealthDashboard")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+0e5c6449bf050c8d422d240b9bede32c07f85c38")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+37a2270fe950a504d494f2fa7ab4286d11111752")]
 [assembly: System.Reflection.AssemblyProductAttribute("ServerHealthDashboard")]
 [assembly: System.Reflection.AssemblyTitleAttribute("ServerHealthDashboard")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

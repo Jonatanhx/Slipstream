@@ -3,19 +3,19 @@
 
 <PageTitle>Dashboard</PageTitle>
 
-<section style="display: flex; height: 400px; gap: 0.5em;">
-    <div style="display:flex; flex: 1; height: 100%; background-color: #24272f; border-radius: 4px;">
+<section class="slp-graph-section">
+    <div class="slp-graph-wrapper">
         <PerCoreUsageBarChart />
     </div>
-    <div style="display:flex; flex: 1; height: 100%; background-color: #24272f; border-radius: 4px;">
-        <TimeSeriesChart />
+    <div class="slp-graph-wrapper">
+        <TotalCpuChart />
     </div>
-    <div style="display:flex; height: 100%; background-color: #24272f; border-radius: 4px;">
+    <div class="slp-graph-wrapper">
         <MemoryUsageChart />
     </div>
 </section>
-<section style="display: flex; height: 650px; gap: 0.5em;">
-    <div style="display:flex; height: 100%; min-width: 30%; background-color: #24272f; border-radius: 4px;">
+<section class="slp-graph-section">
+    <div class="slp-graph-wrapper">
         <ProcessesMetricsHeatmap />
     </div>
 </section>

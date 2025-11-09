@@ -24,7 +24,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Include="Components\Graphs\TimeSeriesChart.razor" />
+    <None Include="Components\Graphs\TotalCpuChart.razor" />
   </ItemGroup>
 
 </Project>

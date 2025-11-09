@@ -2,65 +2,72 @@
 @using ApexCharts
 @using ServerHealthDashboard.Services
 
-<div style="height: 100%; width: 100%; background-color: #24272f;">
+<div class="slp-graph-container">
     <ApexChart TItem="CpuData"
                    Title="Total CPU Usage"
-                   Options="options">
+                   Options="options"
+                    @ref="chart">
         <ApexPointSeries TItem="CpuData"
-                                 Items="data"
+                                 Items="cpuData"
                                  Name="CPU"
                                  SeriesType="SeriesType.Line"
-                                 XValue="@(e => e.Name)"
+                                 XValue="@(e => e.Timestamp)"
                                  YValue="@(e => Math.Round((decimal)e.Usage))"/>
-        </ApexChart>
+    </ApexChart>
 </div>
 
 @code
 {
     private int _index = -1;
-    private List<CpuData> data = new();
+    private List<CpuData> cpuData = new();
     private ApexChartOptions<CpuData> options = new();
+    private CpuMetrics? cpuMetrics;
     private System.Threading.Timer? timer;
     private ApexChart<CpuData>? chart;
+    private const int MaxDataPoints = 20;
 
     public class CpuData
     {
         public double Usage { get; set; }
-        public string Name { get; set; } = string.Empty;
+        public DateTime Timestamp { get; set; }
     }
 
 
     protected override async Task OnInitializedAsync()
     {
         ConfigureChartOptions();
-        var metrics = await MetricsService.GetCpuMetricsAsync();
-        data = new List<CpuData>
-        {
-            new CpuData { Usage = metrics.Usage, Name = metrics.Name },
-        };
+        await LoadCpuMetrics();
+    }
 
+    private async Task LoadCpuMetrics()
+    {
+        cpuMetrics = await MetricsService.GetCpuMetricsAsync();
+        cpuData = new List<CpuData>
+        {
+            new CpuData { Usage = cpuMetrics.Usage, Timestamp = DateTime.Now },
+        };
         timer = new System.Threading.Timer(async _ =>
         {
             await InvokeAsync(async () =>
             {
-                var newMetrics = await MetricsService.GetMemoryMetricsAsync();
+                cpuMetrics = await MetricsService.GetCpuMetricsAsync();
 
-                data = new List<CpuData>
-                {
-                     new CpuData { Usage = metrics.Usage, Name = metrics.Name }
-                };
+                cpuData.Add(new CpuData {Usage = cpuMetrics.Usage, Timestamp = DateTime.Now});
 
                 if (chart != null)
                 {
                     await chart.UpdateSeriesAsync(true);
                 }
 
+                if (cpuData.Count > MaxDataPoints)
+                {
+                    cpuData.RemoveAt(0);
+                }
+
                 StateHasChanged();
             });
         }, null, TimeSpan.FromSeconds(2), TimeSpan.FromSeconds(2));
     }
-
-   
 
     private void ConfigureChartOptions()
     {
